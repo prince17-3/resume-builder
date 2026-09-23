@@ -181,9 +181,10 @@ export default function App() {
     }
   };
 
-  // Handle parsed resume data from AI import
-  const handleResumeImport = (imported: ResumeData) => {
+  // Handle parsed resume data from AI or file import
+  const handleResumeImport = (imported: ResumeData, importedConfig?: ResumeConfig) => {
     setData(imported);
+    if (importedConfig) setConfig(importedConfig);
     // Jump to personal info tab so the user sees the filled data immediately
     setActiveTab('personal');
   };

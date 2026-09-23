@@ -29,7 +29,9 @@ export function isSupportedResumeFile(file: File): boolean {
     file.type in SUPPORTED_MIME_TYPES ||
     file.name.endsWith('.pdf') ||
     file.name.endsWith('.docx') ||
-    file.name.endsWith('.doc')
+    file.name.endsWith('.doc') ||
+    file.name.endsWith('.json') ||
+    file.type === 'application/json'
   );
 }
 

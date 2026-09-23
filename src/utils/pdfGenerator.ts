@@ -9,6 +9,65 @@ export interface PdfGenerationResult {
   download: () => void;
 }
 
+// Helper: find clean white horizontal row to avoid cutting text or headers in half
+function findBestBreakRow(
+  canvas: HTMLCanvasElement,
+  minY: number,
+  maxY: number
+): number {
+  if (maxY <= minY) return maxY;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return maxY;
+
+  const searchHeight = maxY - minY;
+  try {
+    const imgData = ctx.getImageData(0, minY, canvas.width, searchHeight);
+    const data = imgData.data;
+    const width = canvas.width;
+
+    // Scan inward from margins (ignore outermost 12% on left/right where there's no text)
+    const leftX = Math.floor(width * 0.12);
+    const rightX = Math.floor(width * 0.88);
+    const stepX = 4; // Check every 4th pixel across for speed
+
+    let bestRow = maxY;
+    let minDarkPixels = Infinity;
+
+    // Search from maxY (bottom of window) backwards to minY (top of window)
+    for (let row = searchHeight - 1; row >= 0; row--) {
+      let darkPixels = 0;
+      const rowOffset = row * width * 4;
+
+      for (let x = leftX; x < rightX; x += stepX) {
+        const idx = rowOffset + x * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+
+        // Any non-white pixel is text, border, icon, or accent color
+        if (a > 30 && (r < 242 || g < 242 || b < 242)) {
+          darkPixels++;
+        }
+      }
+
+      // Found a completely white horizontal line! (natural gap between sections or bullet points)
+      if (darkPixels === 0) {
+        return minY + row;
+      }
+
+      if (darkPixels < minDarkPixels) {
+        minDarkPixels = darkPixels;
+        bestRow = minY + row;
+      }
+    }
+
+    return bestRow;
+  } catch {
+    return maxY;
+  }
+}
+
 export async function generateResumePdf(
   element: HTMLElement,
   candidateName: string = 'Resume'
@@ -76,54 +135,93 @@ export async function generateResumePdf(
     format: 'a4',
   });
 
-  const imgWidth = a4WidthMm;
-
-  // Page margins in mm — same on all sides, like a Word document default
-  const marginMm = 18; // ~18mm ≈ 0.7 inch top/bottom margin per page
-
-  // Convert margin from mm → canvas pixels using the canvas's own width-to-mm ratio
+  // Page margins in mm — matches the 20mm padding of ResumeDocument
+  const marginMm = 20;
   const pxPerMm = canvas.width / a4WidthMm;
-  const marginPx = Math.round(marginMm * pxPerMm);
-
-  // How many canvas pixels of *content* fit inside one page after removing top+bottom margins
-  const contentHeightPx = Math.floor((a4HeightMm / a4WidthMm) * canvas.width) - marginPx * 2;
-  const totalPages = Math.ceil(canvas.height / contentHeightPx);
-
-  // Content area height in mm (page height minus both margins)
-  const contentHeightMm = a4HeightMm - marginMm * 2;
-
-  // Full page canvas height in px (unchanged — always the full A4 proportional height)
   const fullPageHeightPx = Math.floor((a4HeightMm / a4WidthMm) * canvas.width);
+  const topMarginPx = Math.round(marginMm * pxPerMm);
+  const bottomMarginPx = Math.round(marginMm * pxPerMm);
+  const searchWindowPx = Math.round(35 * pxPerMm); // 35mm search window for natural breaks
 
-  for (let page = 0; page < totalPages; page++) {
-    // Source slice: where in the original canvas this page's content starts
-    const srcY = page * contentHeightPx;
-    const srcH = Math.min(contentHeightPx, canvas.height - srcY);
+  // Maximum content height for page 1 (since top padding is already inside canvas)
+  const maxPage1ContentHeight = fullPageHeightPx - bottomMarginPx;
 
-    // Create a full A4-height white canvas
+  // Maximum content height for page 2+ (reserves topMarginPx at top AND bottomMarginPx at bottom)
+  const maxSubsequentContentHeight = fullPageHeightPx - topMarginPx - bottomMarginPx;
+
+  let currentY = 0;
+  let pageIndex = 0;
+
+  while (currentY < canvas.height) {
+    let sliceHeight: number;
+    let destY: number;
+
+    if (pageIndex === 0) {
+      // Page 1:
+      // The top 20mm is already in canvas from ResumeDocument padding.
+      destY = 0;
+
+      const remaining = canvas.height - currentY;
+      if (remaining <= fullPageHeightPx) {
+        // Fits on Page 1 entirely
+        sliceHeight = remaining;
+      } else {
+        // Multi-page: find the best clean break row before the bottom margin
+        const targetBreak = currentY + maxPage1ContentHeight;
+        const searchMin = Math.max(currentY + 200, targetBreak - searchWindowPx);
+        const breakY = findBestBreakRow(canvas, searchMin, targetBreak);
+        sliceHeight = breakY - currentY;
+      }
+    } else {
+      // Page 2+:
+      // Content does NOT have top padding, so we place it at destY = topMarginPx.
+      // This produces the EXACT SAME header line spacing as the first page!
+      destY = topMarginPx;
+
+      const remaining = canvas.height - currentY;
+      if (remaining <= maxSubsequentContentHeight) {
+        // Fits on this final page
+        sliceHeight = remaining;
+      } else {
+        // More pages follow: find the best clean break row
+        const targetBreak = currentY + maxSubsequentContentHeight;
+        const searchMin = Math.max(currentY + 200, targetBreak - searchWindowPx);
+        const breakY = findBestBreakRow(canvas, searchMin, targetBreak);
+        sliceHeight = breakY - currentY;
+      }
+    }
+
+    // Create a full A4-height white canvas for this page
     const pageCanvas = document.createElement('canvas');
     pageCanvas.width = canvas.width;
     pageCanvas.height = fullPageHeightPx;
     const ctx = pageCanvas.getContext('2d')!;
 
-    // Fill entire page white (covers margins + any short last-page content)
+    // Fill entire page white
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
-    // Draw content starting at marginPx from the top, leaving equal bottom margin
+    // Draw content slice
     ctx.drawImage(
       canvas,
-      0, srcY,           // source: x, y in the full canvas
-      canvas.width, srcH, // source: width, height to copy
-      0, marginPx,        // dest: x, y on the page canvas (top margin offset)
-      canvas.width, srcH  // dest: width, height (same scale — no stretch)
+      0, currentY,              // source x, y
+      canvas.width, sliceHeight,// source w, h
+      0, destY,                 // dest x, y (topMarginPx for page 2+, 0 for page 1)
+      canvas.width, sliceHeight // dest w, h
     );
 
-    const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.97);
+    const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.98);
 
-    if (page > 0) pdf.addPage();
-    // Place content image inset by marginMm on all sides within the PDF page
-    pdf.addImage(pageImgData, 'JPEG', 0, 0, imgWidth, a4HeightMm, undefined, 'FAST');
+    if (pageIndex > 0) {
+      pdf.addPage();
+    }
+    pdf.addImage(pageImgData, 'JPEG', 0, 0, a4WidthMm, a4HeightMm, undefined, 'FAST');
+
+    currentY += sliceHeight;
+    pageIndex++;
+
+    // Safety guard against 0-height infinite loops
+    if (sliceHeight <= 0) break;
   }
 
   const blob = pdf.output('blob');
