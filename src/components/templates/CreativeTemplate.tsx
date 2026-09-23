@@ -11,7 +11,7 @@ export const CreativeTemplate: React.FC<TemplateProps> = ({ data, config }) => {
   const { personalInfo, experiences, education, skillCategories, projects, certifications } = data;
   const { primaryColor, spacing, showIcons } = config;
 
-  const itemSpacing = spacing === 'compact' ? 'space-y-2' : 'space-y-3.5';
+  const itemSpacing = spacing === 'compact' ? 'space-y-3' : 'space-y-4';
 
   return (
     <div className="w-full bg-white text-slate-800 grid grid-cols-12 min-h-full">
@@ -108,7 +108,7 @@ export const CreativeTemplate: React.FC<TemplateProps> = ({ data, config }) => {
               </h2>
               <div className="space-y-2.5">
                 {education.map((edu) => (
-                  <div key={edu.id} className="text-[11px]">
+                  <div key={edu.id} className="text-[11px]" data-pdf-block="true">
                     <p className="font-bold text-slate-900 leading-tight">{edu.degree}</p>
                     <p className="text-slate-600">{edu.institution}</p>
                     <p className="text-slate-400 text-[10px] mt-0.5">
@@ -131,7 +131,7 @@ export const CreativeTemplate: React.FC<TemplateProps> = ({ data, config }) => {
               </h2>
               <div className="space-y-1.5 text-[11px]">
                 {certifications.map((cert) => (
-                  <div key={cert.id}>
+                  <div key={cert.id} data-pdf-block="true">
                     <p className="font-medium text-slate-800 leading-tight">{cert.name}</p>
                     <p className="text-[10px] text-slate-500">
                       {cert.issuer} ({cert.issueDate})
@@ -171,7 +171,7 @@ export const CreativeTemplate: React.FC<TemplateProps> = ({ data, config }) => {
 
             <div className={itemSpacing}>
               {experiences.map((exp) => (
-                <div key={exp.id}>
+                <div key={exp.id} data-pdf-block="true">
                   <div className="flex justify-between items-baseline">
                     <h3 className="font-bold text-slate-900 text-sm">{exp.jobTitle}</h3>
                     <span className="text-[11px] font-medium text-slate-500">
@@ -209,7 +209,7 @@ export const CreativeTemplate: React.FC<TemplateProps> = ({ data, config }) => {
 
             <div className={itemSpacing}>
               {projects.map((proj) => (
-                <div key={proj.id}>
+                <div key={proj.id} data-pdf-block="true">
                   <div className="flex justify-between items-baseline font-semibold text-slate-900">
                     <div className="flex items-center gap-1.5">
                       <span>{proj.title}</span>

@@ -45,7 +45,7 @@ export const ResumeDocument = forwardRef<HTMLDivElement, ResumeDocumentProps>(
         style={{
           width: '210mm',
           minHeight: '297mm',
-          padding: '16mm 18mm',
+          padding: '20mm 20mm',
           boxSizing: 'border-box',
           // Force light mode colors inside resume paper
           colorScheme: 'light',

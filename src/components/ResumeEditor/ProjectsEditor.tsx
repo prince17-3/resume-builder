@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ProjectItem } from '../../types';
-import { Plus, Trash2, FolderGit2, X } from 'lucide-react';
+import { Plus, Trash2, FolderGit2, X, GripVertical } from 'lucide-react';
 
 interface Props {
   projects: ProjectItem[];
@@ -19,7 +19,7 @@ export const ProjectsEditor: React.FC<Props> = ({ projects, onChange }) => {
       link: '',
       github: '',
       description: '',
-      highlights: ['Built key product architecture and improved core metrics.'],
+      highlights: [],
     };
     onChange([...projects, newProj]);
   };
@@ -47,6 +47,27 @@ export const ProjectsEditor: React.FC<Props> = ({ projects, onChange }) => {
     if (!proj) return;
     handleUpdate(projId, {
       technologies: proj.technologies.filter((_, idx) => idx !== index),
+    });
+  };
+
+  const handleAddHighlight = (projId: string) => {
+    const proj = projects.find((p) => p.id === projId);
+    if (!proj) return;
+    handleUpdate(projId, { highlights: [...proj.highlights, ''] });
+  };
+
+  const handleUpdateHighlight = (projId: string, index: number, value: string) => {
+    const proj = projects.find((p) => p.id === projId);
+    if (!proj) return;
+    const updated = proj.highlights.map((h, i) => (i === index ? value : h));
+    handleUpdate(projId, { highlights: updated });
+  };
+
+  const handleRemoveHighlight = (projId: string, index: number) => {
+    const proj = projects.find((p) => p.id === projId);
+    if (!proj) return;
+    handleUpdate(projId, {
+      highlights: proj.highlights.filter((_, i) => i !== index),
     });
   };
 
@@ -190,6 +211,50 @@ export const ProjectsEditor: React.FC<Props> = ({ projects, onChange }) => {
                     Add
                   </button>
                 </div>
+              </div>
+
+              {/* Key Highlights / Bullet Points */}
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-700">
+                    Key Highlights
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => handleAddHighlight(proj.id)}
+                    className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-800 font-semibold"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add bullet
+                  </button>
+                </div>
+                {proj.highlights.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic">
+                    No highlights yet — click "Add bullet" to add a key achievement.
+                  </p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {proj.highlights.map((h, hIdx) => (
+                      <div key={hIdx} className="flex items-start gap-1.5">
+                        <GripVertical className="w-3.5 h-3.5 text-slate-300 mt-1.5 shrink-0" />
+                        <input
+                          type="text"
+                          value={h}
+                          onChange={(e) => handleUpdateHighlight(proj.id, hIdx, e.target.value)}
+                          placeholder="e.g. Reduced load time by 40% through lazy loading"
+                          className="flex-1 text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveHighlight(proj.id, hIdx)}
+                          className="text-slate-300 hover:text-rose-500 mt-1"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

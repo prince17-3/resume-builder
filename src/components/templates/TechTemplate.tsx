@@ -11,10 +11,10 @@ export const TechTemplate: React.FC<TemplateProps> = ({ data, config }) => {
   const { personalInfo, experiences, education, skillCategories, projects, certifications } = data;
   const { primaryColor, spacing, showIcons } = config;
 
-  const itemSpacing = spacing === 'compact' ? 'space-y-2' : 'space-y-3';
+  const itemSpacing = spacing === 'compact' ? 'space-y-3' : 'space-y-4';
 
   return (
-    <div className="w-full bg-white text-slate-800 text-xs space-y-4">
+    <div className="w-full bg-white text-slate-800 text-xs space-y-5">
       {/* Terminal / Tech Style Header */}
       <header className="border-l-4 pl-3 py-1" style={{ borderColor: primaryColor }}>
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between">
@@ -110,7 +110,7 @@ export const TechTemplate: React.FC<TemplateProps> = ({ data, config }) => {
           </h2>
           <div className={itemSpacing}>
             {experiences.map((exp) => (
-              <div key={exp.id}>
+              <div key={exp.id} data-pdf-block="true">
                 <div className="flex justify-between items-baseline">
                   <span className="font-bold text-slate-900 text-sm">{exp.jobTitle}</span>
                   <span className="font-mono-code text-[11px] text-slate-500">
@@ -144,7 +144,7 @@ export const TechTemplate: React.FC<TemplateProps> = ({ data, config }) => {
           </h2>
           <div className={itemSpacing}>
             {projects.map((proj) => (
-              <div key={proj.id}>
+              <div key={proj.id} data-pdf-block="true">
                 <div className="flex justify-between items-baseline font-semibold text-slate-900">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold">{proj.title}</span>
@@ -189,7 +189,7 @@ export const TechTemplate: React.FC<TemplateProps> = ({ data, config }) => {
             </h2>
             <div className="space-y-2">
               {education.map((edu) => (
-                <div key={edu.id}>
+                <div key={edu.id} data-pdf-block="true">
                   <div className="font-semibold text-slate-900">{edu.degree}</div>
                   <div className="text-slate-600">{edu.institution}</div>
                   <div className="text-[11px] font-mono-code text-slate-500 mt-0.5">
@@ -208,7 +208,7 @@ export const TechTemplate: React.FC<TemplateProps> = ({ data, config }) => {
             </h2>
             <div className="space-y-1.5">
               {certifications.map((cert) => (
-                <div key={cert.id} className="flex justify-between items-baseline">
+                <div key={cert.id} className="flex justify-between items-baseline" data-pdf-block="true">
                   <span className="font-medium text-slate-900">{cert.name}</span>
                   <span className="font-mono-code text-[11px] text-slate-500">{cert.issueDate}</span>
                 </div>

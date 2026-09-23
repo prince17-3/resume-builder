@@ -30,6 +30,7 @@ import { ProjectsEditor } from './components/ResumeEditor/ProjectsEditor';
 import { CertificationsEditor } from './components/ResumeEditor/CertificationsEditor';
 import { TemplateCustomizer } from './components/ResumeEditor/TemplateCustomizer';
 import { PdfViewerModal } from './components/PdfViewerModal';
+import { ResumeUploadButton } from './components/ResumeUploadButton';
 
 import {
   User,
@@ -180,6 +181,13 @@ export default function App() {
     }
   };
 
+  // Handle parsed resume data from AI import
+  const handleResumeImport = (imported: ResumeData) => {
+    setData(imported);
+    // Jump to personal info tab so the user sees the filled data immediately
+    setActiveTab('personal');
+  };
+
   // Export JSON backup
   const handleExportJson = () => {
     const jsonStr = JSON.stringify({ data, config }, null, 2);
@@ -318,6 +326,12 @@ export default function App() {
               </button>
             </div>
 
+            {/* Import Resume via AI */}
+            <ResumeUploadButton
+              onDataParsed={handleResumeImport}
+              className="hidden sm:inline-flex"
+            />
+
             {/* Print button */}
             <button
               type="button"
@@ -355,6 +369,10 @@ export default function App() {
 
         {/* Mobile View Toggle Switch */}
         <div className="flex md:hidden border-t border-slate-200 bg-slate-50 px-4 py-1.5 justify-center gap-2">
+          <ResumeUploadButton
+            onDataParsed={handleResumeImport}
+            className="shrink-0"
+          />
           <button
             type="button"
             onClick={() => setMobileView('editor')}

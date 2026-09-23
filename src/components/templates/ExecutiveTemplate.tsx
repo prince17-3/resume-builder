@@ -11,8 +11,8 @@ export const ExecutiveTemplate: React.FC<TemplateProps> = ({ data, config }) => 
   const { primaryColor, spacing } = config;
 
   const spacingClass =
-    spacing === 'compact' ? 'space-y-3' : spacing === 'spacious' ? 'space-y-6' : 'space-y-4';
-  const itemSpacing = spacing === 'compact' ? 'space-y-2' : 'space-y-3';
+    spacing === 'compact' ? 'space-y-4' : spacing === 'spacious' ? 'space-y-7' : 'space-y-5';
+  const itemSpacing = spacing === 'compact' ? 'space-y-3' : 'space-y-4';
 
   return (
     <div className={`w-full bg-white text-slate-900 font-serif-elegant ${spacingClass}`}>
@@ -67,7 +67,7 @@ export const ExecutiveTemplate: React.FC<TemplateProps> = ({ data, config }) => 
 
             <div className={itemSpacing}>
               {experiences.map((exp) => (
-                <div key={exp.id} className="text-xs">
+                <div key={exp.id} className="text-xs" data-pdf-block="true">
                   <div className="flex justify-between items-baseline">
                     <div className="font-bold text-slate-900 text-sm">{exp.company}</div>
                     <div className="text-slate-600 text-[11px] font-medium">
@@ -104,7 +104,7 @@ export const ExecutiveTemplate: React.FC<TemplateProps> = ({ data, config }) => 
             </h2>
             <div className="space-y-2 text-xs">
               {education.map((edu) => (
-                <div key={edu.id}>
+                <div key={edu.id} data-pdf-block="true">
                   <div className="flex justify-between items-baseline">
                     <div className="font-bold text-slate-900">{edu.institution}</div>
                     <div className="text-slate-600 text-[11px]">
@@ -133,7 +133,7 @@ export const ExecutiveTemplate: React.FC<TemplateProps> = ({ data, config }) => 
             </h2>
             <div className={itemSpacing}>
               {projects.map((proj) => (
-                <div key={proj.id} className="text-xs">
+                <div key={proj.id} className="text-xs" data-pdf-block="true">
                   <div className="flex justify-between items-baseline font-bold text-slate-900">
                     <span>
                       {proj.title} {proj.role && <span className="font-normal italic text-slate-600">| {proj.role}</span>}
@@ -189,7 +189,7 @@ export const ExecutiveTemplate: React.FC<TemplateProps> = ({ data, config }) => 
               </h2>
               <div className="space-y-1.5 text-xs">
                 {certifications.map((cert) => (
-                  <div key={cert.id} className="flex justify-between items-baseline">
+                  <div key={cert.id} className="flex justify-between items-baseline" data-pdf-block="true">
                     <span className="font-medium text-slate-900">{cert.name}</span>
                     <span className="text-slate-500 text-[11px] ml-2">{cert.issueDate}</span>
                   </div>

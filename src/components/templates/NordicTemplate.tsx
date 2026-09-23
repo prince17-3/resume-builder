@@ -11,10 +11,10 @@ export const NordicTemplate: React.FC<TemplateProps> = ({ data, config }) => {
   const { personalInfo, experiences, education, skillCategories, projects, certifications } = data;
   const { primaryColor, spacing, showIcons } = config;
 
-  const itemSpacing = spacing === 'compact' ? 'space-y-2.5' : 'space-y-3.5';
+  const itemSpacing = spacing === 'compact' ? 'space-y-3' : 'space-y-4';
 
   return (
-    <div className="w-full bg-white text-stone-800 text-xs space-y-4">
+    <div className="w-full bg-white text-stone-800 text-xs space-y-5">
       {/* Nordic Minimalist Top Banner */}
       <header className="pb-3 border-b border-stone-200">
         <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-2">
@@ -90,7 +90,7 @@ export const NordicTemplate: React.FC<TemplateProps> = ({ data, config }) => {
           </h2>
           <div className={itemSpacing}>
             {experiences.map((exp) => (
-              <div key={exp.id}>
+              <div key={exp.id} data-pdf-block="true">
                 <div className="flex justify-between items-baseline">
                   <div className="font-semibold text-stone-900 text-sm">{exp.jobTitle}</div>
                   <div className="text-stone-400 text-[11px]">
@@ -126,7 +126,7 @@ export const NordicTemplate: React.FC<TemplateProps> = ({ data, config }) => {
           </h2>
           <div className={itemSpacing}>
             {projects.map((proj) => (
-              <div key={proj.id}>
+              <div key={proj.id} data-pdf-block="true">
                 <div className="flex justify-between items-baseline font-medium text-stone-900">
                   <span>
                     {proj.title} {proj.role && <span className="text-stone-500 font-normal">({proj.role})</span>}
@@ -165,7 +165,7 @@ export const NordicTemplate: React.FC<TemplateProps> = ({ data, config }) => {
             </h2>
             <div className="space-y-2">
               {education.map((edu) => (
-                <div key={edu.id}>
+                <div key={edu.id} data-pdf-block="true">
                   <div className="font-semibold text-stone-900">{edu.degree}</div>
                   <div className="text-stone-600">{edu.institution}</div>
                   <div className="text-stone-400 text-[11px] mt-0.5">
@@ -209,7 +209,7 @@ export const NordicTemplate: React.FC<TemplateProps> = ({ data, config }) => {
           </h2>
           <div className="space-y-1 text-stone-600">
             {certifications.map((cert) => (
-              <div key={cert.id} className="flex justify-between items-baseline">
+              <div key={cert.id} className="flex justify-between items-baseline" data-pdf-block="true">
                 <span>{cert.name} — <span className="text-stone-500">{cert.issuer}</span></span>
                 <span className="text-stone-400 text-[11px]">{cert.issueDate}</span>
               </div>
