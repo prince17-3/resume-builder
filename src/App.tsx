@@ -327,9 +327,11 @@ export default function App() {
               </button>
             </div>
 
-            {/* Import Resume via AI */}
+            {/* Import Resume & Cache Manager */}
             <ResumeUploadButton
               onDataParsed={handleResumeImport}
+              currentData={data}
+              currentConfig={config}
               className="hidden sm:inline-flex"
             />
 
@@ -372,6 +374,8 @@ export default function App() {
         <div className="flex md:hidden border-t border-slate-200 bg-slate-50 px-4 py-1.5 justify-center gap-2">
           <ResumeUploadButton
             onDataParsed={handleResumeImport}
+            currentData={data}
+            currentConfig={config}
             className="shrink-0"
           />
           <button

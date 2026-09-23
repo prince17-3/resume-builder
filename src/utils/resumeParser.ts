@@ -226,31 +226,61 @@ export async function parseResumeFile(
 
   const ai = new GoogleGenAI({ apiKey });
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
-    contents: [
-      {
-        role: 'user',
-        parts: [
+  const CANDIDATE_MODELS = [
+    'gemini-3.6-flash',
+    'gemini-2.5-flash',
+    'gemini-1.5-flash',
+    'gemini-2.0-flash',
+  ];
+
+  let rawText = '';
+  let lastError: Error | null = null;
+
+  for (const model of CANDIDATE_MODELS) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: [
           {
-            inlineData: {
-              mimeType,
-              data: base64Data,
-            },
-          },
-          {
-            text: EXTRACTION_PROMPT,
+            role: 'user',
+            parts: [
+              {
+                inlineData: {
+                  mimeType,
+                  data: base64Data,
+                },
+              },
+              {
+                text: EXTRACTION_PROMPT,
+              },
+            ],
           },
         ],
-      },
-    ],
-    config: {
-      temperature: 0.1, // Low temperature for deterministic extraction
-      maxOutputTokens: 4096,
-    },
-  });
+        config: {
+          temperature: 0.1, // Low temperature for deterministic extraction
+          maxOutputTokens: 4096,
+        },
+      });
 
-  const rawText = response.text?.trim() ?? '';
+      rawText = response.text?.trim() ?? '';
+      if (rawText) {
+        lastError = null;
+        break;
+      }
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      // If 404 (model not found/deprecated), try next model
+      if (String(err).includes('404') || String(err).includes('not found') || String(err).includes('no longer available')) {
+        continue;
+      }
+      // For other errors (e.g. invalid key or network error), break immediately
+      throw lastError;
+    }
+  }
+
+  if (lastError && !rawText) {
+    throw lastError;
+  }
 
   if (!rawText) {
     throw new Error('Gemini returned an empty response. Please try again.');
